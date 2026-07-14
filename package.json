@@ -1,0 +1,12 @@
+{
+  "name": "ramesh-krishnaiyer-consultancy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A mobile-first tax and consultancy website for Ramesh Krishnaiyer.",
+  "scripts": {
+    "test": "node --check script.js && node --test tests/site.test.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
