@@ -1,0 +1,57 @@
+name: Build APK
+
+on:
+  push:
+    branches: [main, "claude/**"]
+    paths:
+      - "pert_daily_planner/**"
+      - ".github/workflows/build-apk.yml"
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    name: Build PERT Daily Planner APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # Pinned so the generated Android scaffolding below is deterministic.
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: "3.24.5"
+          cache: true
+
+      - name: Generate Android platform scaffolding
+        run: |
+          flutter create --platforms=android --org com.vsreeni \
+            --project-name pert_daily_planner /tmp/scaffold
+          cp -r /tmp/scaffold/android pert_daily_planner/android
+
+      - name: Apply Android configuration (alarm permissions, desugaring)
+        run: |
+          cp pert_daily_planner/android_config/AndroidManifest.xml \
+             pert_daily_planner/android/app/src/main/AndroidManifest.xml
+          cp pert_daily_planner/android_config/app_build.gradle \
+             pert_daily_planner/android/app/build.gradle
+
+      - name: Build release APK
+        working-directory: pert_daily_planner
+        run: |
+          flutter pub get
+          flutter build apk --release
+
+      - name: Stage APK
+        run: cp pert_daily_planner/build/app/outputs/flutter-apk/app-release.apk PERT-Daily-Planner.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PERT-Daily-Planner-APK
+          path: PERT-Daily-Planner.apk
+          retention-days: 30
