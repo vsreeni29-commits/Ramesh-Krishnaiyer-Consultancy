@@ -42,3 +42,7 @@ For the first deployment, open **Settings → Pages** and set **Source** to **Gi
 ## Content note
 
 No unverified credentials, years of experience, testimonials, pricing or turnaround promises are stated. Add those only after Ramesh confirms them.
+
+## PERT Daily Planner (mobile app)
+
+The [`pert_daily_planner/`](pert_daily_planner/) folder contains a separate, self-contained Flutter Android app — a daily tracker/planner with PERT-based time estimation, countdown alarms, streaks and calendar views. See [its README](pert_daily_planner/README.md) for features, PERT formulas, and how to download the APK from the **Build APK** workflow in the Actions tab.

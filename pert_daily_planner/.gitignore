@@ -1,0 +1,21 @@
+# Flutter/Dart
+.dart_tool/
+.packages
+.pub-cache/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Platform folders are generated in CI from the pinned Flutter template
+# (see .github/workflows/build-apk.yml); android_config/ holds our overrides.
+android/
+ios/
+linux/
+macos/
+windows/
+web/
+
+# IDE
+.idea/
+*.iml
+local.properties
