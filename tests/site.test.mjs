@@ -13,6 +13,12 @@ test('publishes the supplied contact details', () => {
   assert.match(html, /Chennai, Tamil Nadu/);
 });
 
+test('publishes the custom domain as the canonical URL', () => {
+  assert.match(html, /<link rel="canonical" href="https:\/\/www\.rameshkrishnaiyertx\.com\/">/);
+  assert.match(html, /<meta property="og:url" content="https:\/\/www\.rameshkrishnaiyertx\.com\/">/);
+  assert.match(html, /"url": "https:\/\/www\.rameshkrishnaiyertx\.com\/"/);
+});
+
 test('contains all twelve service cards and working filters', () => {
   const cards = html.match(/class="service-card(?: reveal)?(?: featured)?"/g) ?? [];
   assert.equal(cards.length, 12);
