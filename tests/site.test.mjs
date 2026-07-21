@@ -9,7 +9,7 @@ const script = await readFile(new URL('../script.js', import.meta.url), 'utf8');
 test('publishes the supplied contact details', () => {
   assert.match(html, /Ramesh Krishnaiyer/);
   assert.match(html, /tel:\+916383310997/g);
-  assert.match(html, /rameshkishnaiyer1962@gmail\.com/g);
+  assert.match(html, /rameshkrishnaiyertx@gmail\.com/g);
   assert.match(html, /Chennai, Tamil Nadu/);
 });
 
@@ -43,6 +43,6 @@ test('provides accessibility and reduced-motion safeguards', () => {
 
 test('enquiry data stays client-side and prepares an email', () => {
   assert.match(script, /new FormData\(inquiryForm\)/);
-  assert.match(script, /mailto:rameshkishnaiyer1962@gmail\.com/);
+  assert.match(script, /mailto:rameshkrishnaiyertx@gmail\.com/);
   assert.doesNotMatch(script, /fetch\(/);
 });
