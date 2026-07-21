@@ -4,7 +4,7 @@ A responsive, accessible one-page consultancy website designed for Ramesh Krishn
 
 ## Live website
 
-<https://vsreeni29-commits.github.io/Ramesh-Krishnaiyer-Consultancy/>
+<https://www.rameshkrishnaiyertx.com/>
 
 ## Highlights
 
