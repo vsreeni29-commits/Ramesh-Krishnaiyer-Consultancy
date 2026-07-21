@@ -114,7 +114,7 @@ inquiryForm.addEventListener('submit', (event) => {
 
   closeInquiry();
   showToast('Opening your email app with the enquiry ready.');
-  window.location.href = `mailto:rameshkishnaiyer1962@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.location.href = `mailto:rameshkrishnaiyertx@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 });
 
 let toastTimer;
