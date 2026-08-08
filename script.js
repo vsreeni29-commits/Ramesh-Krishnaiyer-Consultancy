@@ -2,14 +2,73 @@ const header = document.querySelector('[data-header]');
 const progressBar = document.querySelector('.scroll-progress span');
 const menuToggle = document.querySelector('[data-menu-toggle]');
 const navigation = document.querySelector('[data-navigation]');
-const filterButtons = [...document.querySelectorAll('[data-filter]')];
-const serviceCards = [...document.querySelectorAll('.service-card')];
-const filterStatus = document.querySelector('[data-filter-status]');
 const dialog = document.querySelector('#inquiry-dialog');
 const inquiryForm = document.querySelector('[data-inquiry-form]');
 const serviceSelect = document.querySelector('[data-service-select]');
+const serviceAreaLabel = document.querySelector('[data-service-area-label]');
+const serviceAreaInput = document.querySelector('[data-service-area-input]');
+const serviceHelp = document.querySelector('[data-service-help]');
+const dialogIntro = document.querySelector('[data-dialog-intro]');
 const toast = document.querySelector('[data-toast]');
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const serviceCatalog = Object.freeze({
+  "Income Tax": [
+    "General Consultation",
+    "TDS Returns e-Filing",
+    "Advance Tax",
+    "ITR1 (For Resident Individuals)",
+    "ITR2 (For Residents & Individuals)",
+    "ITR3 (For Residents & Individuals with Income from Business)",
+    "ITR4 (For Residents, Individuals & Firms with Income from Business)",
+    "ITR5 (For Non-Residents, Individuals, Partnership Firms, LLP & AOPs)",
+    "ITR6 (For Registered Co., Tax Exempt u/Sec. 11)",
+    "ITR7 (For Trusts, Charities & Educational Institutions)"
+  ],
+  "GST": [
+    "General Consultation",
+    "New Registration",
+    "GSTR1 (For Monthly & Quarterly e-Filing)",
+    "GSTR3B (Summary of GST Input/Output Tax Reconciliation & e-Filing)",
+    "GSTR4 (For Registered Business Taxpayers - Half-yearly/Annual e-Filing)",
+    "GSTR5 (For Non-Resident Business GST Tax e-Filing)",
+    "GSTR6 (For Business Taxpayers - ITC Distribution Reconciliation & e-Filing)",
+    "GSTR7 (For Business TDS under GST Deductions & Refunds e-Filing)",
+    "GSTR8 (For E-Commerce Traders - TCS Reconciliation & e-Filing)",
+    "GSTR9 (For GST Registered Businesses - Annual Statement Summary & e-Filing)",
+    "GSTR10 (For Cancellation/Surrender of Existing GST Number)",
+    "CMP4 (For GST Taxpayers - Composition Tax Reconciliation & e-Filing)",
+    "ITC04 (For Business Taxpayers - Quarterly Returns under Capital Goods ITC)"
+  ],
+  "Professional Tax": [
+    "General Consultation",
+    "Professional Tax Deduction/Collection Certificate (Companies, Firms or Corporations)",
+    "Professional Tax Enrolment Certificate (Individuals, Business Owners & Sole Proprietors)",
+    "Professional Tax Workings & e-Filing"
+  ],
+  "EPF & ESIC": [
+    "General Consultation",
+    "Online Registration Process",
+    "EPF Monthly Combined Challan A/c 1, 2, 10, 21 & 22 Workings & e-Filing",
+    "ESIC Monthly Contribution Workings & e-Filing",
+    "EPF & ESIC Half-yearly & Annual Returns Process & e-Filing",
+    "EPF & ESIC Notification/Notice Management & Issue Resolution"
+  ],
+  "Book Keeping & Finalisation of Accounts": [
+    "General Consultation",
+    "Maintaining and Recording All Financial Transactions",
+    "Day-to-day Financial Activities and Transactions",
+    "Interpreting, Analysing, Summarising & Reporting Financial Transactions",
+    "Preparation of Financial Reports and Statements for Audit Finalisation",
+    "Internal Audit"
+  ],
+  "Other Workings & Process": [
+    "FSSAI Registration as per Shop Act",
+    "Udyam/Aadhaar (MSME/SSI Registration)",
+    "TDS Returns & e-Filing",
+    "PAN/TAN Application Process"
+  ]
+});
 
 document.querySelector('[data-year]').textContent = new Date().getFullYear();
 
@@ -42,34 +101,52 @@ document.addEventListener('click', (event) => {
   if (!navigation.contains(event.target) && !menuToggle.contains(event.target)) closeMenu();
 });
 
-filterButtons.forEach((button) => {
-  button.addEventListener('click', () => {
-    const filter = button.dataset.filter;
-    let visibleCount = 0;
+function renderServiceOptions(serviceArea) {
+  serviceSelect.replaceChildren();
 
-    filterButtons.forEach((item) => {
-      const selected = item === button;
-      item.classList.toggle('active', selected);
-      item.setAttribute('aria-pressed', String(selected));
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.textContent = serviceArea === 'all'
+    ? 'Choose a service'
+    : `Choose a ${serviceArea} service`;
+  placeholder.disabled = true;
+  placeholder.selected = true;
+  serviceSelect.append(placeholder);
+
+  const serviceAreas = serviceArea === 'all' ? Object.keys(serviceCatalog) : [serviceArea];
+
+  serviceAreas.forEach((area) => {
+    const container = serviceArea === 'all' ? document.createElement('optgroup') : document.createDocumentFragment();
+    if (serviceArea === 'all') container.label = area;
+
+    serviceCatalog[area].forEach((serviceItem) => {
+      const option = document.createElement('option');
+      option.value = serviceItem;
+      option.textContent = serviceItem;
+      option.dataset.serviceArea = area;
+      container.append(option);
     });
 
-    serviceCards.forEach((card) => {
-      const groups = card.dataset.group.split(' ');
-      const isVisible = filter === 'all' || groups.includes(filter);
-      card.hidden = !isVisible;
-      if (isVisible) visibleCount += 1;
-    });
-
-    const label = button.textContent.trim().toLowerCase();
-    filterStatus.textContent = filter === 'all'
-      ? `Showing all ${visibleCount} services`
-      : `Showing ${visibleCount} services for ${label}`;
+    serviceSelect.append(container);
   });
-});
 
-function openInquiry(service = 'General consultation') {
-  const optionExists = [...serviceSelect.options].some((option) => option.value === service);
-  serviceSelect.value = optionExists ? service : 'General consultation';
+  const optionCount = serviceAreas.reduce((total, area) => total + serviceCatalog[area].length, 0);
+  serviceHelp.textContent = serviceArea === 'all'
+    ? `All ${optionCount} choices are grouped by service area.`
+    : `Showing ${optionCount} choices for ${serviceArea}.`;
+}
+
+let activeServiceArea = 'all';
+
+function openInquiry(serviceArea = 'all') {
+  activeServiceArea = Object.hasOwn(serviceCatalog, serviceArea) ? serviceArea : 'all';
+  inquiryForm.reset();
+  serviceAreaInput.value = activeServiceArea === 'all' ? '' : activeServiceArea;
+  serviceAreaLabel.textContent = activeServiceArea === 'all' ? 'All service areas' : activeServiceArea;
+  dialogIntro.textContent = activeServiceArea === 'all'
+    ? 'Browse all choices grouped by service area, then prepare your email.'
+    : `Choose the exact requirement under ${activeServiceArea}, then prepare your email.`;
+  renderServiceOptions(activeServiceArea);
   document.body.classList.add('modal-open');
   dialog.showModal();
 }
@@ -79,7 +156,16 @@ function closeInquiry() {
 }
 
 document.querySelectorAll('[data-open-inquiry]').forEach((button) => {
-  button.addEventListener('click', () => openInquiry(button.dataset.service));
+  button.addEventListener('click', () => openInquiry(button.dataset.serviceArea));
+});
+
+serviceSelect.addEventListener('change', () => {
+  const selectedOption = serviceSelect.selectedOptions[0];
+  if (!selectedOption) return;
+
+  const selectedArea = selectedOption.dataset.serviceArea || activeServiceArea;
+  serviceAreaInput.value = selectedArea;
+  if (activeServiceArea === 'all') serviceAreaLabel.textContent = selectedArea;
 });
 
 document.querySelector('[data-close-inquiry]').addEventListener('click', closeInquiry);
@@ -97,16 +183,19 @@ inquiryForm.addEventListener('submit', (event) => {
   const formData = new FormData(inquiryForm);
   const name = formData.get('name').trim();
   const phone = formData.get('phone').trim();
-  const service = formData.get('service');
+  const serviceArea = formData.get('serviceArea').trim();
+  const serviceItem = formData.get('serviceItem').trim();
   const message = formData.get('message').trim() || 'Please contact me to discuss this requirement.';
-  const subject = `Consultation request: ${service}`;
+  const subject = `Consultation request: ${serviceArea} - ${serviceItem}`;
   const body = [
     `Hello Ramesh,`,
     '',
-    `I would like to enquire about ${service}.`,
+    `I would like to enquire about ${serviceItem} under ${serviceArea}.`,
     '',
     `Name: ${name}`,
     `Mobile: ${phone}`,
+    `Service area: ${serviceArea}`,
+    `Selected service: ${serviceItem}`,
     `Requirement: ${message}`,
     '',
     'Thank you.'
