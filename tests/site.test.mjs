@@ -6,6 +6,13 @@ const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
 const css = await readFile(new URL('../styles.css', import.meta.url), 'utf8');
 const script = await readFile(new URL('../script.js', import.meta.url), 'utf8');
 
+const catalogMatch = script.match(/const serviceCatalog = Object\.freeze\((\{[\s\S]*?\n\})\);/);
+assert.ok(catalogMatch, 'The service catalogue must be present in script.js');
+const serviceCatalog = JSON.parse(catalogMatch[1]);
+
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const escapeHtml = (value) => value.replaceAll('&', '&amp;');
+
 test('publishes the supplied contact details', () => {
   assert.match(html, /Ramesh Krishnaiyer/);
   assert.match(html, /tel:\+916383310997/g);
@@ -19,13 +26,39 @@ test('publishes the custom domain as the canonical URL', () => {
   assert.match(html, /"url": "https:\/\/www\.rameshkrishnaiyertx\.com\/"/);
 });
 
-test('contains all twelve service cards and working filters', () => {
-  const cards = html.match(/class="service-card(?: reveal)?(?: featured)?"/g) ?? [];
-  assert.equal(cards.length, 12);
-  assert.match(html, /data-filter="personal"/);
-  assert.match(html, /data-filter="business"/);
-  assert.match(html, /data-filter="organisation"/);
-  assert.match(script, /card\.hidden = !isVisible/);
+test('publishes the six document-backed service areas without audience filters', () => {
+  const cards = html.match(/class="service-card reveal"/g) ?? [];
+  assert.equal(cards.length, 6);
+  assert.deepEqual(Object.keys(serviceCatalog), [
+    'Income Tax',
+    'GST',
+    'Professional Tax',
+    'EPF & ESIC',
+    'Book Keeping & Finalisation of Accounts',
+    'Other Workings & Process'
+  ]);
+
+  for (const serviceArea of Object.keys(serviceCatalog)) {
+    const encodedArea = escapeHtml(serviceArea);
+    assert.match(html, new RegExp(`data-service-area="${escapeRegex(encodedArea)}"`));
+  }
+
+  assert.doesNotMatch(html, /data-filter=/);
+  assert.doesNotMatch(script, /filterButtons|filterStatus|card\.hidden/);
+});
+
+test('catalogues all 43 document services and scopes the enquiry dropdown', () => {
+  const counts = Object.values(serviceCatalog).map((items) => items.length);
+  assert.deepEqual(counts, [10, 13, 4, 6, 6, 4]);
+  assert.equal(counts.reduce((total, count) => total + count, 0), 43);
+  assert.equal(serviceCatalog['Income Tax'][0], 'General Consultation');
+  assert.match(serviceCatalog.GST.at(-1), /^ITC04/);
+  assert.equal(serviceCatalog['Other Workings & Process'].at(-1), 'PAN/TAN Application Process');
+  assert.match(html, /data-service-area-label/);
+  assert.match(html, /name="serviceItem"/);
+  assert.match(script, /function renderServiceOptions\(serviceArea\)/);
+  assert.match(script, /option\.dataset\.serviceArea = area/);
+  assert.match(script, /openInquiry\(button\.dataset\.serviceArea\)/);
 });
 
 test('keeps internal navigation targets valid', () => {
@@ -43,6 +76,8 @@ test('provides accessibility and reduced-motion safeguards', () => {
 
 test('enquiry data stays client-side and prepares an email', () => {
   assert.match(script, /new FormData\(inquiryForm\)/);
+  assert.match(script, /Service area: \$\{serviceArea\}/);
+  assert.match(script, /Selected service: \$\{serviceItem\}/);
   assert.match(script, /mailto:rameshkrishnaiyertx@gmail\.com/);
   assert.doesNotMatch(script, /fetch\(/);
 });
