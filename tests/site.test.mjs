@@ -47,13 +47,16 @@ test('publishes the six document-backed service areas without audience filters',
   assert.doesNotMatch(script, /filterButtons|filterStatus|card\.hidden/);
 });
 
-test('catalogues all 43 document services and scopes the enquiry dropdown', () => {
+test('catalogues all 44 services and scopes the enquiry dropdown', () => {
   const counts = Object.values(serviceCatalog).map((items) => items.length);
-  assert.deepEqual(counts, [10, 13, 4, 6, 6, 4]);
-  assert.equal(counts.reduce((total, count) => total + count, 0), 43);
+  assert.deepEqual(counts, [10, 13, 4, 6, 6, 5]);
+  assert.equal(counts.reduce((total, count) => total + count, 0), 44);
   assert.equal(serviceCatalog['Income Tax'][0], 'General Consultation');
   assert.match(serviceCatalog.GST.at(-1), /^ITC04/);
-  assert.equal(serviceCatalog['Other Workings & Process'].at(-1), 'PAN/TAN Application Process');
+  assert.equal(
+    serviceCatalog['Other Workings & Process'].at(-1),
+    'All kinds of Document Preparations and Online Registration'
+  );
   assert.match(html, /data-service-area-label/);
   assert.match(html, /name="serviceItem"/);
   assert.match(script, /function renderServiceOptions\(serviceArea\)/);
