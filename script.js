@@ -66,7 +66,8 @@ const serviceCatalog = Object.freeze({
     "FSSAI Registration as per Shop Act",
     "Udyam/Aadhaar (MSME/SSI Registration)",
     "TDS Returns & e-Filing",
-    "PAN/TAN Application Process"
+    "PAN/TAN Application Process",
+    "All kinds of Document Preparations and Online Registration"
   ]
 });
 
